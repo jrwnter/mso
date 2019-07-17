@@ -43,7 +43,7 @@ class Swarm:
         self.history_swarm_best_x = [x]
         self.swarm_best_fitness = 0
         self.particle_best_fitness = self.fitness
-        self.best_smiles = self.smiles
+        self.best_smiles = self.smiles[0]
 
     def next_step(self):
         """

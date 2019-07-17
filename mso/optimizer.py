@@ -4,10 +4,12 @@ Module defining the main Particle Swarm optimizer class.
 import multiprocessing as mp
 import pandas as pd
 import time
+import logging
 from rdkit import Chem, rdBase
 from mso.swarm import Swarm
 from mso.util import canonicalize_smiles
 rdBase.DisableLog('rdApp.error')
+logging.getLogger('tensorflow').disabled = True
 
 class BasePSOptimizer:
     """
@@ -89,25 +91,29 @@ class BasePSOptimizer:
         :param step: The current iteration step of the optimizer.
         :return: None
         """
-        new_df = pd.DataFrame(columns=["step", "swarm", "fitness"])
+        new_df = pd.DataFrame(columns=["step", "swarm", "fitness", "smiles"])
         new_df.fitness = [swarm.swarm_best_fitness for swarm in self.swarms]
+        new_df.smiles = [swarm.best_smiles for swarm in self.swarms]
         new_df.swarm = [i for i in range(len(self.swarms))]
         new_df.step = step
-        self.best_fitness_history = self.best_fitness_history.append(new_df)
+        self.best_fitness_history = self.best_fitness_history.append(new_df, sort=False)
 
-    def run(self, num_steps):
+    def run(self, num_steps, num_track=10):
         """
         The main optimization loop.
         :param num_steps: The number of update steps.
-        :return:
-            swarms: The optimized particle swarm.
-            best_solutions: The best solutions found over the course of optimization.
-
+        :param num_track: Number of best solutions to track.
+        :return: The optimized particle swarm.
         """
+        # evaluate initial score
+        for swarm in self.swarms:
+            self.update_fitness(swarm)
         for step in range(num_steps):
+            self._update_best_fitness_history(step)
+            self._update_best_solutions(num_track)
             for swarm in self.swarms:
                 self._next_step_and_evaluate(swarm)
-        return self.swarms, self.best_solutions
+        return self.swarms
 
     @classmethod
     def from_query(cls, init_smiles, num_part, num_swarms, inference_model, scoring_functions, phi1=2.,

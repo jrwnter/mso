@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='mso',
     version='0.1',
-    packages=['mso', 'mso.data'],
+    packages=['mso', 'mso.data', 'mso.objectives'],
     url='',
     license='',
     author='Robin WInter',

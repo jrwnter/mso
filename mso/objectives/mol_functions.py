@@ -1,7 +1,7 @@
 """
 Module with scoring functions that take RDKit mol objects as input for scoring.
 """
-from cdddswarm.data import data_dir
+from mso.data import data_dir
 import os
 import pandas as pd
 import numpy as np
@@ -11,7 +11,7 @@ from rdkit.Chem import Descriptors, AllChem
 from rdkit.Chem.Descriptors import qed, MolLogP
 from rdkit import DataStructs
 
-smarts = pd.read_table("sure_chembl_alerts.txt", header=None)[1].tolist()
+smarts = pd.read_csv("sure_chembl_alerts.txt", header=None, sep='\t')[1].tolist()
 alert_mols = [Chem.MolFromSmarts(smart) for smart in smarts if Chem.MolFromSmarts(smart) is not None]
     
 def check_valid_mol(func):
@@ -35,7 +35,10 @@ def qed_score(mol):
     :param mol: input mol
     :return: score
     """
-    score = qed(mol)
+    try:
+        score = qed(mol)
+    except :
+        score = 0
     return score
 
 @check_valid_mol
