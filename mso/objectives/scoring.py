@@ -10,10 +10,10 @@ class ScoringFunction:
     """
     Class that handles the integration of functions used to evaluate the particles/molecules in the particle swarm.
     """
-    def __init__(self, score_function, name, description=None, desirability=None, truncate_left=True,
+    def __init__(self, func, name, description=None, desirability=None, truncate_left=True,
                  truncate_right=True, weight=100, is_mol_func=False):
         """
-        :param score_function: A function that takes either a single RDKit mol object as input or an array of particle
+        :param func: A function that takes either a single RDKit mol object as input or an array of particle
             positions (num_particles, ndim) in the CDDD space as input and outputs a single score or an array of
             num_particles scores respectively. Scoring functions with additional arguments should be defined as partial.
         :param name: A unique Name of the scoring function. Used for bookkeeping.
@@ -31,13 +31,13 @@ class ScoringFunction:
             particle positions (False).
         """
 
-        self._score_function = score_function
+        self.func = func
         self.name = name
         self.description = description
         self.weight = weight
         self.is_mol_func = is_mol_func
         self._desirability = desirability or _default_desirability
-        self._desirability_function = self._create_desirability_function(self._desirability,
+        self.desirability_function = self._create_desirability_function(self._desirability,
                                                                          truncate_left=truncate_left,
                                                                          truncate_right=truncate_right)
 
@@ -76,9 +76,9 @@ class ScoringFunction:
             desirability_scores: The unscaled score scaled only with respect to the desirability curve.
         """
         if self.is_mol_func:
-            unscaled_scores = np.array([self._score_function(mol) for mol in input])
+            unscaled_scores = np.array([self.func(mol) for mol in input])
         else:
-            unscaled_scores = self._score_function(input)
+            unscaled_scores = self.func(input)
         desirability_scores = self._desirability_function(unscaled_scores)
         scaled_scores = desirability_scores * self.weight
 
