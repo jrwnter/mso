@@ -3,10 +3,6 @@
 Implementation of the method proposed in the paper "Efficient Multi-Objective Molecular Optimization in a Continuous Latent Space" by Robin Winter, Floriane Montanari, Andreas Steffen, Hans Briem, Frank Noé and Djork-Arné Clevert.<sup>1</sup>
 
 ### Dependencies
-- python3
-- numpy
-- rdkit
-- scipy
 - [cddd](https://github.com/jrwnter/cddd)
 
 ### Installing
@@ -53,11 +49,19 @@ The resulting curve looks like this:
 <br/>
 <img src="example/d_curve.png" width="50%" height="50%">
 <br/>
-And indeed, running the optimizer a few steps results into molecules with the optimal amound of heavy atoms.
+And indeed, running the optimizer for a few steps results in a molecules with the optimal amound of heavy atoms.
 <br/>
 <img src="example/hac_opt.png" width="50%" height="50%">
 <br/>
-
+### Multi-Objective Optimization
+To optimize multiple objective functions at the same time, they can simple append to the same list.
+```python
+scoring_functions = [ScoringFunction(heavy_atom_count, "hac", desirability=hac_desirability, is_mol_func=True), ScoringFunction(qed_score, "qed", is_mol_func=True)]
+```
+Optionally, an individual weight can be assigned to each scoring function to balance their importance.
+<br/>
+<img src="example/mo_opt.png" width="50%" height="50%">
+<br/> 
 ### References
 [1] Chemical Science, 2019, DOI: 10.1039/C9SC01928F https://pubs.rsc.org/en/content/articlelanding/2019/SC/C9SC01928F#!divAbstract
 
