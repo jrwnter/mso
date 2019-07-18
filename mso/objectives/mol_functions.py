@@ -65,7 +65,6 @@ def substructure_match_score(mol, query, kind="any"):
     :param kind: "any": input should match one of the queries.  "all": should match all.
     :return: 1 if it matches 0 if not.
     """
-    query = Chem.MolFromMolBlock(query)
     if not isinstance(query, list):
         query = [query]
 

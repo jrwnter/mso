@@ -62,7 +62,28 @@ scoring_functions = [ScoringFunction(heavy_atom_count, "hac", desirability=hac_d
 Optionally, an individual weight can be assigned to each scoring function to balance their importance.
 <br/>
 <img src="example/mo_opt.png" width="50%" height="50%">
-<br/> 
+<br/>
+### Constrained Optimization
+Sometimes it might be of interest to constrain the chemical space to a certain region during the optimization. This can be done, for example, by applying a substructure constrain. In this example optimize again for QED and a defined range of heavy atoms but penalize for solutions that have a benzene substructure. Moreover, to avoid generating large macrocycles we also penalize for them. The necesarry functions are included in the mol_functions module:
+```python
+from mso.objectives.mol_functions import substructure_match_score, penalize_macrocycles
+from functools import partial
+substructure_match_score = partial(substructure_match_score, query=Chem.MolFromSmiles("c1ccccc1")) # use partial to define the additional argument (the substructure) 
+miss_match_desirability = [{"x": 0, "y": 1}, {"x": 1, "y": 0}] # invert the resulting score to penalize for a match.
+scoring_functions = [ScoringFunction(heavy_atom_count, "hac", desirability=hac_desirability, is_mol_func=True),
+                     ScoringFunction(qed_score, "qed", is_mol_func=True),
+                     ScoringFunction(substructure_match_score, "miss_match",desirability=miss_match_desirability, is_mol_func=True),
+                     ScoringFunction(penalize_macrocycles, "macro", is_mol_func=True),
+                    ]
+```
+<br/>
+<img src="example/co_opt.png" width="50%" height="50%">
+<br/>
+### Writing your own Scoring Function
+The ScoringFunction class can wrap any function that has following properties:
+- Takes a RDKit mol object as input and returns a number as score.
+- Takes the CDDD positions of the particles in a swarm as input [num_particels, num_dim] and returns an array of scores [num_particles,]
+For examples see mso.objectives.mol_functions or mso.objectives.emb_functions.
 ### References
 [1] Chemical Science, 2019, DOI: 10.1039/C9SC01928F https://pubs.rsc.org/en/content/articlelanding/2019/SC/C9SC01928F#!divAbstract
 
