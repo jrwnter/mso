@@ -79,7 +79,7 @@ class ScoringFunction:
             unscaled_scores = np.array([self.func(mol) for mol in input])
         else:
             unscaled_scores = self.func(input)
-        desirability_scores = self._desirability_function(unscaled_scores)
+        desirability_scores = self.desirability_function(unscaled_scores)
         scaled_scores = desirability_scores * self.weight
 
         return unscaled_scores, scaled_scores, desirability_scores

@@ -28,7 +28,7 @@ After loading some packages and defning the inference model, starting point and 
 ```python
 opt = BasePSOptimizer.from_query(
     init_smiles=init_smiles,
-    num_part=100,
+    num_part=200,
     num_swarms=1,
     inference_model=infer_model,
     scoring_functions=scoring_functions)
@@ -37,7 +37,10 @@ Now we can just run the optimization for a few steps.
 ```python
 opt.run(20)
 ```
-The best results are summarized in opt.best_solutions. The optimization history (best solution in each step and swarm) is summarized in opt.best_fitness_history. Most of the time, the optimizer should be able to find a solution with a score higher than 0.9 already after a few steps.
+The best results are summarized in opt.best_solutions. The optimization history (best solution in each step and swarm) is summarized in opt.best_fitness_history. Most of the time, the optimizer should be able to find a solution with a score higher than 0.8 already after a few steps.
+<br/>
+<img src="example/qed_opt.png" width="50%" height="50%">
+<br/>
 
 ### Desirability Scaling
 Often, it is not the goal to maximize a function as much as possible but to keep a molecular property within a certain range. To account for this, the ScoringFunction class can rescale the output of an objective function with respect to a desirability curve. To demonstrate this property, we optimize here the number of heavy atoms in a molecule. We would like to generate molecules that have a certain number (or range) of heavy atoms.  In this case generated molecules should have between 20 and 25 heavy atoms.  To achieve this, we define a desirability curve that has its peak in this range and assigns lower scores below and above:
@@ -47,8 +50,14 @@ hac_desirability = [{"x": 0, "y": 0}, {"x": 5, "y": 0.1}, {"x": 15, "y": 0.9}, {
 scoring_functions = [ScoringFunction(heavy_atom_count, "hac", desirability=hac_desirability, is_mol_func=True)]
 ```
 The resulting curve looks like this:
-<img src="d_curve.png" width="50%" height="50%">
-And indeed, running the optimizer a few steps results into molecules with that amound of heavy atoms.
+<br/>
+<img src="example/d_curve.png" width="50%" height="50%">
+<br/>
+And indeed, running the optimizer a few steps results into molecules with the optimal amound of heavy atoms.
+<br/>
+<img src="example/hac_opt.png" width="50%" height="50%">
+<br/>
+
 ### References
 [1] Chemical Science, 2019, DOI: 10.1039/C9SC01928F https://pubs.rsc.org/en/content/articlelanding/2019/SC/C9SC01928F#!divAbstract
 
