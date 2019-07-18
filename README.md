@@ -40,7 +40,7 @@ The best results are summarized in opt.best_solutions. The optimization history 
 <br/>
 
 ### Desirability Scaling
-Often, it is not the goal to maximize a function as much as possible but to keep a molecular property within a certain range. To account for this, the ScoringFunction class can rescale the output of an objective function with respect to a desirability curve. To demonstrate this functionality, we here optimize the number of heavy atoms in a molecule. We would like to generate molecules that have a certain number (or range) of heavy atoms.  In this case, generated molecules should have between 20 and 25 heavy atoms.  To achieve this, we define a desirability curve that has its peak in this range and assigns lower scores below and above:
+Often, the goal is not to maximize a function as much as possible but to keep a molecular property within a certain range. To account for this, the ScoringFunction class can rescale the output of an objective function with respect to a desirability curve. To demonstrate this functionality, here we optimize the number of heavy atoms in a molecule. We would like to generate molecules that have a certain number (or range) of heavy atoms.  In this case, generated molecules should have between 20 and 25 heavy atoms.  To achieve this, we define a desirability curve that has its peak in this range and assigns lower scores below and above:
 ```python
 from mso.objectives.mol_functions import heavy_atom_count
 hac_desirability = [{"x": 0, "y": 0}, {"x": 5, "y": 0.1}, {"x": 15, "y": 0.9}, {"x": 20, "y": 1.0}, {"x": 25, "y": 1.0}, {"x": 30, "y": 0.9,}, {"x": 40, "y": 0.1}, {"x": 45, "y": 0.0}]
