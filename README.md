@@ -7,7 +7,8 @@ Implementation of the method proposed in the paper "Efficient Multi-Objective Mo
 
 ### Installing
 ```
-python setup.py install
+cd mso
+pip install .
 ```
 ### Getting Started
 As a first simple experiment we will optimize a query molecule with respect to the drug likeness score (QED Bickerton et al.). We will start the optimization from a simple benzene molecule which has a QED score of 0.31.

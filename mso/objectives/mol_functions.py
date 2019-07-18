@@ -11,7 +11,8 @@ from rdkit.Chem import Descriptors, AllChem
 from rdkit.Chem.Descriptors import qed, MolLogP
 from rdkit import DataStructs
 
-smarts = pd.read_csv("sure_chembl_alerts.txt", header=None, sep='\t')[1].tolist()
+
+smarts = pd.read_csv(os.path.join(data_dir, "sure_chembl_alerts.txt"), header=None, sep='\t')[1].tolist()
 alert_mols = [Chem.MolFromSmarts(smart) for smart in smarts if Chem.MolFromSmarts(smart) is not None]
     
 def check_valid_mol(func):
