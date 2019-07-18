@@ -60,7 +60,7 @@ scoring_functions = [ScoringFunction(heavy_atom_count, "hac", desirability=hac_d
 ```
 Optionally, an individual weight can be assigned to each scoring function to balance their importance.
 <br/>
-<img src="example/mo_opt.png" width="50%" height="50%">
+<img src="example/mo2_opt.png" width="50%" height="50%">
 <br/> 
 ### References
 [1] Chemical Science, 2019, DOI: 10.1039/C9SC01928F https://pubs.rsc.org/en/content/articlelanding/2019/SC/C9SC01928F#!divAbstract
