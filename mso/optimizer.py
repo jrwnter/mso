@@ -1,10 +1,10 @@
 """"
 Module defining the main Particle Swarm optimizer class.
 """
-import multiprocessing as mp
-import pandas as pd
 import time
 import logging
+import multiprocessing as mp
+import pandas as pd
 from rdkit import Chem, rdBase
 from mso.swarm import Swarm
 from mso.util import canonicalize_smiles
@@ -18,11 +18,12 @@ class BasePSOptimizer:
     def __init__(self, swarms, inference_model, scoring_functions):
         """
 
-        :param swarms: List of swarm objects each defining an individual particle swarm that is used for optimization.
-        :param inference_model: The inference model used to encode/decode smiles to/from the Continuous Data-Diven
-            molecular Descriptor (CDDD) space.
-        :param scoring_functions: List of functions that are used to evaluate a generated molecule. Either take a RDKit
-            mol object as input or a point in the cddd space.
+        :param swarms: List of swarm objects each defining an individual particle swarm that
+            is used for optimization.
+        :param inference_model: The inference model used to encode/decode smiles to/from the
+            Continuous Data-Diven molecular Descriptor (CDDD) space.
+        :param scoring_functions: List of functions that are used to evaluate a generated molecule.
+            Either take a RDKit mol object as input or a point in the cddd space.
         """
         self.infer_model = inference_model
         self.scoring_functions = scoring_functions
@@ -32,8 +33,9 @@ class BasePSOptimizer:
 
     def update_fitness(self, swarm):
         """
-        Method that calculates and updates the fitness of each particle in  a given swarm. A particles fitness is
-        defined as weighted average of each scoring functions output for this particle.
+        Method that calculates and updates the fitness of each particle in  a given swarm. A
+        particles fitness is defined as weighted average of each scoring functions output for
+        this particle.
         :param swarm: The swarm that is updated.
         :return: The swarm that is updated.
         """
@@ -56,8 +58,8 @@ class BasePSOptimizer:
 
     def _next_step_and_evaluate(self, swarm):
         """
-        Method that wraps the update of the particles position (next step) and the evaluation of the fitness at these
-        new positions.
+        Method that wraps the update of the particles position (next step) and the evaluation of
+        the fitness at these new positions.
         :param swarm: The swarm that is updated.
         :return: The swarm that is updated.
         """
@@ -70,8 +72,8 @@ class BasePSOptimizer:
 
     def _update_best_solutions(self, num_track):
         """
-        Method that updates the best_solutions dataframe that keeps track of the overall best solutions over the course
-        of the optimization.
+        Method that updates the best_solutions dataframe that keeps track of the overall best
+        solutions over the course of the optimization.
         :param num_track: Length of the best_solutions dataframe.
         :return: The max, min and mean fitness of the best_solutions dataframe.
         """
@@ -81,9 +83,14 @@ class BasePSOptimizer:
         new_df.smiles = new_df.smiles.map(canonicalize_smiles)
         self.best_solutions = self.best_solutions.append(new_df)
         self.best_solutions = self.best_solutions.drop_duplicates("smiles")
-        self.best_solutions = self.best_solutions.sort_values("fitness", ascending=False).reset_index(drop=True)
+        self.best_solutions = self.best_solutions.sort_values(
+            "fitness",
+            ascending=False).reset_index(drop=True)
         self.best_solutions = self.best_solutions.iloc[:num_track]
-        return self.best_solutions.fitness.max(), self.best_solutions.fitness.min(), self.best_solutions.fitness.mean()
+        best_solutions_max = self.best_solutions.fitness.max()
+        best_solutions_min = self.best_solutions.fitness.min()
+        best_solutions_mean = self.best_solutions.fitness.mean()
+        return best_solutions_max, best_solutions_min, best_solutions_mean
 
     def _update_best_fitness_history(self, step):
         """
@@ -116,30 +123,32 @@ class BasePSOptimizer:
         return self.swarms
 
     @classmethod
-    def from_query(cls, init_smiles, num_part, num_swarms, inference_model, scoring_functions, phi1=2.,
-                   phi2=2., phi3=2., x_min=-1., x_max=1., v_min=-0.6, v_max=0.6, **kwargs):
+    def from_query(cls, init_smiles, num_part, num_swarms, inference_model,
+                   scoring_functions, phi1=2., phi2=2., phi3=2., x_min=-1.,
+                   x_max=1., v_min=-0.6, v_max=0.6, **kwargs):
         """
-        Classmethod to create a PSO instance with (possible) multiple swarms which particles are initialized at the
-            position of the embedded input SMILES. All swarms are initialized at the same position.
-        :param init_smiles: (string) The SMILES the defines the molecules which acts as starting point of the
-            optimization.
+        Classmethod to create a PSO instance with (possible) multiple swarms which particles are
+        initialized at the position of the embedded input SMILES. All swarms are initialized at the
+        same position.
+        :param init_smiles: (string) The SMILES the defines the molecules which acts as starting
+            point of the optimization.
         :param num_part: Number of particles in each swarm.
         :param num_swarms: Number of individual swarm to be optimized.
-        :param inference_model: A inference model instance that is used for encoding an decoding SMILES to and from the
-            CDDD space.
-        :param scoring_functions: List of functions that are used to evaluate a generated molecule. Either take a RDKit
-            mol object as input or a point in the cddd space.
+        :param inference_model: A inference model instance that is used for encoding an decoding
+            SMILES to and from the CDDD space.
+        :param scoring_functions: List of functions that are used to evaluate a generated molecule.
+            Either take a RDKit mol object as input or a point in the cddd space.
         :param phi1: PSO hyperparamter.
         :param phi2: PSO hyperparamter.
         :param phi3: PSO hyperparamter.
-        :param x_min: min bound of the optimization space (should be set to -1 as its the default CDDD embeddings take
-            values between -1 and 1.
-        :param x_max: max bound of the optimization space (should be set to -1 as its the default CDDD embeddings take
-            values between -1 and 1.
-        :param v_min: minimal velocity component of a particle. Also used as lower bound for the uniform distribution
-            used to sample the initial velocity.
-        :param v_max: maximal velocity component of a particle. Also used as upper bound for the uniform distribution
-            used to sample the initial velocity.
+        :param x_min: min bound of the optimization space (should be set to -1 as its the default
+            CDDD embeddings take values between -1 and 1).
+        :param x_max: max bound of the optimization space (should be set to -1 as its the default
+            CDDD embeddings take values between -1 and 1).
+        :param v_min: minimal velocity component of a particle. Also used as lower bound for the
+            uniform distribution used to sample the initial velocity.
+        :param v_max: maximal velocity component of a particle. Also used as upper bound for the
+            uniform distribution used to sample the initial velocity.
         :param kwargs: additional parameters for the PSO class
         :return: A PSOptimizer instance.
         """
@@ -159,31 +168,32 @@ class BasePSOptimizer:
         return cls(swarms, inference_model, scoring_functions, **kwargs)
 
     @classmethod
-    def from_query_list(cls, init_smiles, num_part, num_swarms, inference_model, scoring_functions, phi1=2.,
-                   phi2=2., phi3=2., x_min=-1., x_max=1., v_min=-0.6, v_max=0.6, **kwargs):
+    def from_query_list(cls, init_smiles, num_part, num_swarms, inference_model,
+                        scoring_functions, phi1=2., phi2=2., phi3=2., x_min=-1.,
+                        x_max=1., v_min=-0.6, v_max=0.6, **kwargs):
         """
-        Classmethod to create a PSO instance with (possible) multiple swarms which particles are initialized at the
-            position of the embedded input SMILES. Each swarms is  initialized at the position defined by the different
-            SMILES in the input list.
-        :param init_smiles: A List of SMILES which each define the molecule which acts as starting point of each swarm
-            in the optimization.
+        Classmethod to create a PSO instance with (possible) multiple swarms which particles are
+        initialized at the position of the embedded input SMILES. Each swarms is  initialized at
+        the position defined by the different SMILES in the input list.
+        :param init_smiles: A List of SMILES which each define the molecule which acts as starting
+            point of each swarm in the optimization.
         :param num_part: Number of particles in each swarm.
         :param num_swarms: Number of individual swarm to be optimized.
-        :param inference_model: A inference model instance that is used for encoding an decoding SMILES to and from the
-            CDDD space.
-        :param scoring_functions: List of functions that are used to evaluate a generated molecule. Either take a RDKit
-            mol object as input or a point in the cddd space.
+        :param inference_model: A inference model instance that is used for encoding an decoding
+            SMILES to and from the CDDD space.
+        :param scoring_functions: List of functions that are used to evaluate a generated molecule.
+            Either take a RDKit mol object as input or a point in the cddd space.
         :param phi1: PSO hyperparamter.
         :param phi2: PSO hyperparamter.
         :param phi3: PSO hyperparamter.
-        :param x_min: min bound of the optimization space (should be set to -1 as its the default CDDD embeddings take
-            values between -1 and 1.
-        :param x_max: max bound of the optimization space (should be set to -1 as its the default CDDD embeddings take
-            values between -1 and 1.
-        :param v_min: minimal velocity component of a particle. Also used as lower bound for the uniform distribution
-            used to sample the initial velocity.
-        :param v_max: maximal velocity component of a particle. Also used as upper bound for the uniform distribution
-            used to sample the initial velocity.
+        :param x_min: min bound of the optimization space (should be set to -1 as its the default
+            CDDD embeddings take values between -1 and 1).
+        :param x_max: max bound of the optimization space (should be set to -1 as its the default
+            CDDD embeddings take values between -1 and 1).
+        :param v_min: minimal velocity component of a particle. Also used as lower bound for the
+            uniform distribution used to sample the initial velocity.
+        :param v_max: maximal velocity component of a particle. Also used as upper bound for the
+            uniform distribution used to sample the initial velocity.
         :param kwargs: additional parameters for the PSO class
         :return: A PSOptimizer instance.
         """
@@ -209,12 +219,14 @@ class BasePSOptimizer:
     @classmethod
     def from_swarm_dicts(cls, swarm_dicts, inference_model, scoring_functions, **kwargs):
         """
-        Classmethod to create a PSO instance from a list of dictionaries each defining an individual swarm.
-        :param swarm_dicts: A list of dictionaries each defining an individual swarm. See Swarm.from_dict for more info.
-        :param inference_model: A inference model instance that is used for encoding an decoding SMILES to and from the
-            CDDD space.
-        :param scoring_functions: List of functions that are used to evaluate a generated molecule. Either take a RDKit
-            mol object as input or a point in the cddd space.
+        Classmethod to create a PSO instance from a list of dictionaries each defining an
+        individual swarm.
+        :param swarm_dicts: A list of dictionaries each defining an individual swarm.
+            See Swarm.from_dict for more info.
+        :param inference_model: A inference model instance that is used for encoding an decoding
+            SMILES to and from the CDDD space.
+        :param scoring_functions: List of functions that are used to evaluate a generated molecule.
+            Either take a RDKit mol object as input or a point in the cddd space.
         :param kwargs: additional parameters for the PSO class
         :return: A PSOptimizer instance.
         """
@@ -228,17 +240,19 @@ class BasePSOptimizer:
 
 class MPPSOOptimizer(BasePSOptimizer):
     """
-    A PSOOptimizer class that uses multiprocessing to parallelize the optimization of multiple swarms. Only works if
-    the inference_model is a instance of the inference_server class in the CDDD package that rolls out calculations on
-    multiple zmq servers (possibly on multiple GPUs).
+    A PSOOptimizer class that uses multiprocessing to parallelize the optimization of multiple
+    swarms. Only works if the inference_model is a instance of the inference_server class in the
+    CDDD package that rolls out calculations on multiple zmq servers (possibly on multiple GPUs).
     """
     def __init__(self, swarms, inference_model, scoring_functions, num_workers=1):
         """
-        :param swarms: List of swarm objects each defining an individual particle swarm that is used for optimization.
-        :param inference_model: The inference model used to encode/decode smiles to/from the Continuous Data-Diven
-            molecular Descriptor (CDDD) space. Should be an inference_server instance to benefit from multiprocessing.
-        :param scoring_functions: List of functions that are used to evaluate a generated molecule. Either take a RDKit
-            mol object as input or a point in the cddd space.
+        :param swarms: List of swarm objects each defining an individual particle swarm that is
+            used for optimization.
+        :param inference_model: The inference model used to encode/decode smiles to/from the
+            Continuous Data-Diven molecular Descriptor (CDDD) space. Should be an inference_server
+            instance to benefit from multiprocessing.
+        :param scoring_functions: List of functions that are used to evaluate a generated molecule.
+            Either take a RDKit mol object as input or a point in the cddd space.
         :param num_workers: Number of workers used for the multiprocessing.
         """
         super().__init__(swarms, inference_model, scoring_functions)
@@ -246,7 +260,8 @@ class MPPSOOptimizer(BasePSOptimizer):
 
     def run(self, num_steps, num_track=500):
         """
-        The main optimization loop in the multiprocessing case with a bit more result tracking and timing.
+        The main optimization loop in the multiprocessing case with a bit more result
+        tracking and timing.
         :param num_steps: The number of update steps.
         :param num_track: Number of best solutions to track.
         :return:
@@ -255,13 +270,13 @@ class MPPSOOptimizer(BasePSOptimizer):
         """
         pool = mp.Pool(self.num_workers)
         for step in range(num_steps):
-            st = time.time()
+            start_time = time.time()
             self.swarms = pool.map(self._next_step_and_evaluate, self.swarms)
-            et = time.time() - st
+            end_time = time.time() - start_time
             max_fitness, min_fitness, mean_fitness = self._update_best_solutions(num_track)
             self._update_best_fitness_history(step)
             print("Step %d, max: %.3f, min: %.3f, mean: %.3f, et: %.1f s"
-                  %(step, max_fitness, min_fitness, mean_fitness, et))
+                  %(step, max_fitness, min_fitness, mean_fitness, end_time))
             if (num_track == 1) & (self.best_solutions[:num_track].fitness.mean() == 1.):
                 break
             elif self.best_solutions[:num_track].fitness.mean() == 1.:
