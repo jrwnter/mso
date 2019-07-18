@@ -17,7 +17,7 @@ from mso.optimizer import BasePSOptimizer
 from mso.objectives.scoring import ScoringFunction
 from mso.objectives.mol_functions import qed_score
 from cddd.inference import InferenceModel
-infer_model = InferenceModel() # The CDDD inference model used to encode/decode molecular SMILES strings to/from the CDDD space
+infer_model = InferenceModel() # The CDDD inference model used to encode/decode molecular SMILES strings to/from the CDDD space. You might need to specify the path to the pretrained model (e.g. default_model)
 init_smiles = "c1ccccc1" # SMILES representation of benzene
 scoring_functions = [ScoringFunction(func=qed_score, name="qed", is_mol_func=True)] # wrap the drug likeness score inside a scoring function instance
 ```
