@@ -70,15 +70,17 @@ from mso.objectives.mol_functions import substructure_match_score, penalize_macr
 from functools import partial
 substructure_match_score = partial(substructure_match_score, query=Chem.MolFromSmiles("c1ccccc1")) # use partial to define the additional argument (the substructure) 
 miss_match_desirability = [{"x": 0, "y": 1}, {"x": 1, "y": 0}] # invert the resulting score to penalize for a match.
-scoring_functions = [ScoringFunction(heavy_atom_count, "hac", desirability=hac_desirability, is_mol_func=True),
-                     ScoringFunction(qed_score, "qed", is_mol_func=True),
-                     ScoringFunction(substructure_match_score, "miss_match",desirability=miss_match_desirability, is_mol_func=True),
-                     ScoringFunction(penalize_macrocycles, "macro", is_mol_func=True),
-                    ]
+scoring_functions = [
+    ScoringFunction(heavy_atom_count, "hac", desirability=hac_desirability, is_mol_func=True),
+    ScoringFunction(qed_score, "qed", is_mol_func=True),
+    ScoringFunction(substructure_match_score, "miss_match",desirability=miss_match_desirability, is_mol_func=True),
+    ScoringFunction(penalize_macrocycles, "macro", is_mol_func=True)
+]
 ```
 <br/>
 <img src="example/co_opt.png" width="50%" height="50%">
 <br/>
+
 ### Writing your own Scoring Function
 The ScoringFunction class can wrap any function that has following properties:
 - Takes a RDKit mol object as input and returns a number as score.
