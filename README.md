@@ -86,7 +86,7 @@ The ScoringFunction class can wrap any function that has following properties:
 - Takes a RDKit mol object as input and returns a number as score.
 - Takes the CDDD positions of the particles in a swarm as input [num_particels, num_dim] and returns an array of scores [num_particels].
 
-For examples see mso.objectives.mol_functions or mso.objectives.emb_functions.
+For examples, see the modules mso.objectives.mol_functions and mso.objectives.emb_functions.
 ### References
 [1] Chemical Science, 2019, DOI: 10.1039/C9SC01928F https://pubs.rsc.org/en/content/articlelanding/2019/SC/C9SC01928F#!divAbstract
 
