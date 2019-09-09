@@ -8,5 +8,6 @@ setup(
     license='',
     author='Robin WInter',
     author_email='',
-    description=''
+    description='',
+    include_package_data=True
 )
