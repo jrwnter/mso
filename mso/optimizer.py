@@ -244,6 +244,7 @@ class MPPSOOptimizer(BasePSOptimizer):
     swarms. Only works if the inference_model is a instance of the inference_server class in the
     CDDD package that rolls out calculations on multiple zmq servers (possibly on multiple GPUs).
     """
+    # TODO: this is different from the base class, as run() does no initial evaluation but got the evaluate query method.
     def __init__(self, swarms, inference_model, scoring_functions, num_workers=1):
         """
         :param swarms: List of swarm objects each defining an individual particle swarm that is
@@ -257,6 +258,12 @@ class MPPSOOptimizer(BasePSOptimizer):
         """
         super().__init__(swarms, inference_model, scoring_functions)
         self.num_workers = num_workers
+
+    def evaluate_query(self):
+        pool = mp.Pool(self.num_workers)
+        self.swarms = pool.map(self.update_fitness, self.swarms)
+        pool.close()
+        return self.swarms
 
     def run(self, num_steps, num_track=500):
         """
