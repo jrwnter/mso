@@ -15,7 +15,7 @@ class BasePSOptimizer:
     """
         Base particle swarm optimizer class. It handles the optimization of a swarm object.
     """
-    def __init__(self, swarms, inference_model, scoring_functions):
+    def __init__(self, swarms, inference_model, scoring_functions=None):
         """
 
         :param swarms: List of swarm objects each defining an individual particle swarm that
@@ -39,6 +39,7 @@ class BasePSOptimizer:
         :param swarm: The swarm that is updated.
         :return: The swarm that is updated.
         """
+        assert self.scoring_functions is not None
         weight_sum = 0
         fitness = 0
         mol_list = [Chem.MolFromSmiles(sml) for sml in swarm.smiles]
@@ -124,7 +125,7 @@ class BasePSOptimizer:
 
     @classmethod
     def from_query(cls, init_smiles, num_part, num_swarms, inference_model,
-                   scoring_functions, phi1=2., phi2=2., phi3=2., x_min=-1.,
+                   scoring_functions=None, phi1=2., phi2=2., phi3=2., x_min=-1.,
                    x_max=1., v_min=-0.6, v_max=0.6, **kwargs):
         """
         Classmethod to create a PSO instance with (possible) multiple swarms which particles are
@@ -169,7 +170,7 @@ class BasePSOptimizer:
 
     @classmethod
     def from_query_list(cls, init_smiles, num_part, num_swarms, inference_model,
-                        scoring_functions, phi1=2., phi2=2., phi3=2., x_min=-1.,
+                        scoring_functions=None, phi1=2., phi2=2., phi3=2., x_min=-1.,
                         x_max=1., v_min=-0.6, v_max=0.6, **kwargs):
         """
         Classmethod to create a PSO instance with (possible) multiple swarms which particles are
@@ -217,7 +218,8 @@ class BasePSOptimizer:
         return cls(swarms, inference_model, scoring_functions, **kwargs)
 
     @classmethod
-    def from_swarm_dicts(cls, swarm_dicts, inference_model, scoring_functions, **kwargs):
+    def from_swarm_dicts(cls, swarm_dicts, inference_model, scoring_functions=None, x_min=-1., x_max=1.,
+                         inertia_weight=0.9, phi1=2., phi2=2., phi3=2.):
         """
         Classmethod to create a PSO instance from a list of dictionaries each defining an
         individual swarm.
@@ -230,8 +232,16 @@ class BasePSOptimizer:
         :param kwargs: additional parameters for the PSO class
         :return: A PSOptimizer instance.
         """
-        swarms = [Swarm.from_dict(swarm_dict) for swarm_dict in swarm_dicts]
-        return cls(swarms, inference_model, scoring_functions, **kwargs)
+        swarms = [Swarm.from_dict(
+            dictionary=swarm_dict,
+            x_min=x_min,
+            x_max=x_max,
+            inertia_weight=inertia_weight,
+            phi1=phi1,
+            phi2=phi2,
+            phi3=phi3
+        ) for swarm_dict in swarm_dicts]
+        return cls(swarms, inference_model, scoring_functions)
 
     def __getstate__(self):
         """dont pickle all swarms --> faster serialization/multiprocessing"""
@@ -245,7 +255,7 @@ class MPPSOOptimizer(BasePSOptimizer):
     CDDD package that rolls out calculations on multiple zmq servers (possibly on multiple GPUs).
     """
     # TODO: this is different from the base class, as run() does no initial evaluation but got the evaluate query method.
-    def __init__(self, swarms, inference_model, scoring_functions, num_workers=1):
+    def __init__(self, swarms, inference_model, scoring_functions=None, num_workers=1):
         """
         :param swarms: List of swarm objects each defining an individual particle swarm that is
             used for optimization.
@@ -290,3 +300,26 @@ class MPPSOOptimizer(BasePSOptimizer):
                 break
         pool.close()
         return self.swarms, self.best_solutions
+
+class MPPSOOptimizerManualScoring(MPPSOOptimizer):
+    def __init__(self, swarms, inference_model, num_workers=1):
+        super().__init__(swarms, inference_model, num_workers=num_workers)
+
+    def _next_step_and_evaluate(self, swarm, fitness):
+        """
+        Method that updates the particles position (next step)
+        :param swarm: The swarm that is updated.
+        :return: The swarm that is updated.
+        """
+        swarm.next_step()
+        smiles = self.infer_model.emb_to_seq(swarm.x)
+        swarm.smiles = smiles
+        swarm.x = self.infer_model.seq_to_emb(swarm.smiles)
+        swarm.update_fitness(fitness)
+        return swarm
+
+    def run_one_iteration(self, fitness):
+        pool = mp.Pool(self.num_workers)
+        self.swarms = pool.starmap(self._next_step_and_evaluate, zip(self.swarms, fitness))
+        pool.close()
+        return self.swarms

@@ -94,11 +94,20 @@ class Swarm:
                                                                     self.swarm_best_fitness)
 
     @classmethod
-    def from_dict(cls, dictionary):
+    def from_dict(cls, dictionary, x_min=-1., x_max=1.,
+                 inertia_weight=0.9, phi1=2., phi2=2., phi3=2.):
         """
         Classmethod to create a Swarm instance from a dictionary. Can be used to reinitialize a
         Swarm with all important properties.
         :param dictionary: Dictionary with swarm parameters.
+        :param x_min: min bound of the optimization space (should be set to -1 as its the default
+            CDDD embeddings take values between -1 and 1.
+        :param x_max: max bound of the optimization space (should be set to -1 as its the default
+            CDDD embeddings take values between -1 and 1.
+        :param inertia_weight: PSO hyperparamter.
+        :param phi1: PSO hyperparamter.
+        :param phi2: PSO hyperparamter.
+        :param phi3: PSO hyperparamter.
         :return: A Swarm instance.
         """
         particles = dictionary['particles']
@@ -108,8 +117,17 @@ class Swarm:
         velocity = np.array([particle['v'] for particle in particles])
         particle_best_x = np.array([particle['part_best_x'] for particle in particles])
         particle_best_fitness = [particle['part_best_fitness'] for particle in particles]
-        #TODO: add arguments for x_min, phi in dict/database...
-        swarm = Swarm(smiles=smiles, x=position, v=velocity)
+        swarm = Swarm(
+            smiles=smiles,
+            x=position,
+            v=velocity,
+            x_min=x_min,
+            x_max=x_max,
+            inertia_weight=inertia_weight,
+            phi1=phi1,
+            phi2=phi2,
+            phi3=phi3
+        )
         swarm.particle_best_x = particle_best_x
         #swarm.unscaled_scores = {score['name']:  score['unscaled'] for score in scores}
         #swarm.scaled_scores = {score['name']: score['scaled'] for score in scores}
