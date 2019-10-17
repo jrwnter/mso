@@ -3,7 +3,7 @@ import json
 from cddd.inference import InferenceServer
 from mso.optimizer import MPPSOOptimizerManualScoring
 
-inferenceServer = InferenceServer(port_frontend=5530, use_running=True)
+inferenceServer = InferenceServer(port_frontend=5527, use_running=True)
 app = Flask(__name__)
 
 @app.route('/init_swarm/', methods=['POST'])
