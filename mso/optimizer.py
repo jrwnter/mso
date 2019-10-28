@@ -311,11 +311,11 @@ class MPPSOOptimizerManualScoring(MPPSOOptimizer):
         :param swarm: The swarm that is updated.
         :return: The swarm that is updated.
         """
+        swarm.update_fitness(fitness)
         swarm.next_step()
         smiles = self.infer_model.emb_to_seq(swarm.x)
         swarm.smiles = smiles
         swarm.x = self.infer_model.seq_to_emb(swarm.smiles)
-        swarm.update_fitness(fitness)
         return swarm
 
     def run_one_iteration(self, fitness):
