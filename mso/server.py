@@ -2,6 +2,11 @@ from flask import Flask, jsonify, make_response, request
 import json
 from cddd.inference import InferenceServer
 from mso.optimizer import MPPSOOptimizerManualScoring
+from OpenSSL import SSL
+
+"""context = SSL.Context()
+context.use_privatekey_file('/.opensll/key.pem')
+context.use_certificate_file('~/.opensll/cert.pem')"""
 
 inferenceServer = InferenceServer(port_frontend=5527, use_running=True)
 app = Flask(__name__)
@@ -23,9 +28,9 @@ def next_step():
     optimizer = MPPSOOptimizerManualScoring.from_swarm_dicts(
         swarm_dicts=data["swarm_dicts"],
         inference_model=inferenceServer,
-        phi1 = data["phi1"],
-        phi2 = data["phi2"],
-        phi3 = data["phi3"]
+        phi1=data["phi1"],
+        phi2=data["phi2"],
+        phi3=data["phi3"]
     )
     swarms = optimizer.run_one_iteration(data["fitness"])
     output = [swarm.to_dict() for swarm in swarms]
@@ -33,4 +38,4 @@ def next_step():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=8890)
+    app.run(debug=False, host='0.0.0.0', port=8890, ssl_context=('/gpfs01/home/ggwaq/.opensll/cert.pem', '/gpfs01/home/ggwaq/.opensll/key.pem'))

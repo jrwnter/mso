@@ -219,7 +219,7 @@ class BasePSOptimizer:
 
     @classmethod
     def from_swarm_dicts(cls, swarm_dicts, inference_model, scoring_functions=None, x_min=-1., x_max=1.,
-                         inertia_weight=0.9, phi1=2., phi2=2., phi3=2.):
+                         inertia_weight=0.9, phi1=2., phi2=2., phi3=2., **kwargs):
         """
         Classmethod to create a PSO instance from a list of dictionaries each defining an
         individual swarm.
@@ -241,7 +241,7 @@ class BasePSOptimizer:
             phi2=phi2,
             phi3=phi3
         ) for swarm_dict in swarm_dicts]
-        return cls(swarms, inference_model, scoring_functions)
+        return cls(swarms, inference_model, scoring_functions, **kwargs)
 
     def __getstate__(self):
         """dont pickle all swarms --> faster serialization/multiprocessing"""
@@ -304,6 +304,7 @@ class MPPSOOptimizer(BasePSOptimizer):
 class MPPSOOptimizerManualScoring(MPPSOOptimizer):
     def __init__(self, swarms, inference_model, num_workers=1):
         super().__init__(swarms, inference_model, num_workers=num_workers)
+        print("running new version...")
 
     def _next_step_and_evaluate(self, swarm, fitness):
         """
