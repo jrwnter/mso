@@ -143,7 +143,7 @@ class Swarm:
         Classmethod to create a new Swarm instance from a single query. All particles are
         initialized at the same defined position.
         :param init_sml: The initial SMILES that defines the starting point of the particles in
-            the swarm.
+            the swarm. If it is a list of multiple smiles, num_part smiles will be randomly drawn
         :param init_emb: The initial position of the particles in the swarm
             (init_emb = encoder(init_smiles)
         :param num_part: The number of particles that are initialized in the swarm at the given
@@ -156,8 +156,13 @@ class Swarm:
         :param kwargs: Additional keyword arguments.
         :return: A Swarm instance.
         """
-        smiles = num_part * [init_sml]
-        x = np.tile(init_emb, [num_part, 1])
+        if isinstance(init_sml, list):
+            idxs = np.random.randint(0, len(init_sml), size=num_part)
+            smiles = [init_sml[i] for i in idxs]
+            x = init_emb[idxs]
+        else:
+            smiles = num_part * [init_sml]
+            x = np.tile(init_emb, [num_part, 1])
         v = np.random.uniform(v_min, v_max, [num_part, init_emb.shape[-1]])
         swarm = Swarm(smiles=smiles, x=x, v=v, *args, **kwargs)
         return swarm

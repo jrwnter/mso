@@ -1,6 +1,7 @@
 """
 Module with scoring functions that take RDKit mol objects as input for scoring.
 """
+import warnings
 from mso.data import data_dir
 import os
 import pandas as pd
@@ -63,11 +64,10 @@ def substructure_match_score(mol, query, kind="any"):
     :param mol: input molecule
     :param query: A list or a single SMARTS pattern the query is checked against.
     :param kind: "any": input should match one of the queries.  "all": should match all.
-    :return: 1 if it matches 0 if not.
+    :return: 1 if it matches, 0 if not.
     """
     if not isinstance(query, list):
         query = [query]
-
     if kind == "any":
         match = np.any([mol.HasSubstructMatch(sub) for sub in query])
     elif kind == "all":
@@ -208,7 +208,7 @@ try:
 
         return normalized_log_p + normalized_SA + normalized_cycle
 except:
-    print("failed to load reward_penalized_log_p score. Consider installing package networkx")
+    warnings.warn("failed to load reward_penalized_log_p score. Consider installing package networkx")
     reward_penalized_log_p = None
 
 fps = np.load(os.path.join(data_dir, "chembl_fps.npy"), allow_pickle=True).item()

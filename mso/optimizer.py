@@ -132,7 +132,7 @@ class BasePSOptimizer:
         initialized at the position of the embedded input SMILES. All swarms are initialized at the
         same position.
         :param init_smiles: (string) The SMILES the defines the molecules which acts as starting
-            point of the optimization.
+            point of the optimization. If it is a list of multiple smiles, num_part smiles will be randomly drawn.
         :param num_part: Number of particles in each swarm.
         :param num_swarms: Number of individual swarm to be optimized.
         :param inference_model: A inference model instance that is used for encoding an decoding
