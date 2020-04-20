@@ -2,13 +2,8 @@ from flask import Flask, jsonify, make_response, request
 import json
 from cddd.inference import InferenceServer
 from mso.optimizer import MPPSOOptimizerManualScoring
-from OpenSSL import SSL
 
-"""context = SSL.Context()
-context.use_privatekey_file('/.opensll/key.pem')
-context.use_certificate_file('~/.opensll/cert.pem')"""
-
-inferenceServer = InferenceServer(port_frontend=5527, use_running=True)
+inferenceServer = InferenceServer(port_frontend=5520, use_running=True)
 app = Flask(__name__)
 
 @app.route('/init_swarm/', methods=['POST'])

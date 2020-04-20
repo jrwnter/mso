@@ -73,13 +73,13 @@ class Swarm:
         best_idx = np.argmax(fitness)
         best_fitness = fitness[best_idx]
         if best_fitness > self.swarm_best_fitness:
-            self.history_swarm_best_x.append(self.x[best_idx])
-            self.swarm_best_fitness = best_fitness
-            self.swarm_best_x = self.x[best_idx]
-            self.best_smiles = self.smiles[best_idx]
+            self.history_swarm_best_x.append(np.copy(self.x[best_idx]))
+            self.swarm_best_fitness = np.copy(best_fitness)
+            self.swarm_best_x = np.copy(self.x[best_idx])
+            self.best_smiles = np.copy(self.smiles[best_idx])
         self.particle_best_x = np.where(
             np.expand_dims(fitness, 1) > np.expand_dims(self.particle_best_fitness, 1),
-            self.x,
+            self.x.copy(),
             self.particle_best_x
         )
 

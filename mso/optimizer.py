@@ -2,6 +2,7 @@
 Module defining the main Particle Swarm optimizer class.
 """
 import time
+import numpy as np
 import logging
 import multiprocessing as mp
 import pandas as pd
@@ -118,7 +119,9 @@ class BasePSOptimizer:
             self.update_fitness(swarm)
         for step in range(num_steps):
             self._update_best_fitness_history(step)
-            self._update_best_solutions(num_track)
+            max_fitness, min_fitness, mean_fitness = self._update_best_solutions(num_track)
+            print("Step %d, max: %.3f, min: %.3f, mean: %.3f"
+                  % (step, max_fitness, min_fitness, mean_fitness))
             for swarm in self.swarms:
                 self._next_step_and_evaluate(swarm)
         return self.swarms
@@ -248,6 +251,47 @@ class BasePSOptimizer:
         return {k: v for k, v in self.__dict__.items() if k not in ('swarms',)}
 
 
+class ParallelSwarmOptimizer(BasePSOptimizer):
+    def _next_step_and_evaluate(self):
+        """
+        Method that wraps the update of the particles position (next step) and the evaluation of
+        the fitness at these new positions.
+        :param swarm: The swarm that is updated.
+        :return: The swarm that is updated.
+        """
+        num_part = self.swarms[0].num_part
+        emb = []
+        for swarm in self.swarms:
+            swarm.next_step()
+            emb.append(swarm.x)
+        emb = np.concatenate(emb)
+        smiles = self.infer_model.emb_to_seq(emb)
+        x = self.infer_model.seq_to_emb(smiles)
+        for i, swarm in enumerate(self.swarms):
+            swarm.smiles = smiles[i*num_part: (i+1)*num_part]
+            swarm.x = x[i*num_part: (i+1)*num_part]
+            swarm = self.update_fitness(swarm)
+
+    def run(self, num_steps, num_track=10):
+        """
+        The main optimization loop.
+        :param num_steps: The number of update steps.
+        :param num_track: Number of best solutions to track.
+        :return: The optimized particle swarm.
+        """
+        # evaluate initial score
+        for swarm in self.swarms:
+            self.update_fitness(swarm)
+        for step in range(num_steps):
+            self._update_best_fitness_history(step)
+            max_fitness, min_fitness, mean_fitness = self._update_best_solutions(num_track)
+            print("Step %d, max: %.3f, min: %.3f, mean: %.3f"
+                  % (step, max_fitness, min_fitness, mean_fitness))
+            self._next_step_and_evaluate()
+        return self.swarms, self.best_solutions
+
+
+
 class MPPSOOptimizer(BasePSOptimizer):
     """
     A PSOOptimizer class that uses multiprocessing to parallelize the optimization of multiple
@@ -304,7 +348,6 @@ class MPPSOOptimizer(BasePSOptimizer):
 class MPPSOOptimizerManualScoring(MPPSOOptimizer):
     def __init__(self, swarms, inference_model, num_workers=1):
         super().__init__(swarms, inference_model, num_workers=num_workers)
-        print("running new version...")
 
     def _next_step_and_evaluate(self, swarm, fitness):
         """
