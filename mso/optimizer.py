@@ -48,7 +48,7 @@ class BasePSOptimizer:
             if scoring_function.is_mol_func:
                 unscaled_scores, scaled_scores, desirability_scores = scoring_function(mol_list)
             else:
-                unscaled_scores, scaled_scores, desirability_scores = scoring_function(swarm.x)
+                unscaled_scores, scaled_scores, desirability_scores = scoring_function(swarm)
             swarm.unscaled_scores[scoring_function.name] = unscaled_scores
             swarm.scaled_scores[scoring_function.name] = scaled_scores
             swarm.desirability_scores[scoring_function.name] = desirability_scores
