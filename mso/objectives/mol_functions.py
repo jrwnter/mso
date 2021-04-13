@@ -2,7 +2,7 @@
 Module with scoring functions that take RDKit mol objects as input for scoring.
 """
 import warnings
-from mso.data import data_dir
+from mso.data import data_dir, sascorer
 import os
 import pandas as pd
 import numpy as np
@@ -159,7 +159,6 @@ def tox_alert(mol):
     return score
 
 try:
-    import cdddswarm.data.sascorer
     import networkx as nx
     @check_valid_mol
     def reward_penalized_log_p(mol):
